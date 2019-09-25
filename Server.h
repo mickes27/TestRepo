@@ -1,10 +1,12 @@
 #pragma once
 #include "Player.h"
+#include <thread>
 
 class Server
 {
 public:
 	Server(boost::asio::io_context& ioContext);
+	~Server();
 	void mainLoop();
 private:
 	void startAccepting();
@@ -14,4 +16,5 @@ private:
 	tcp::acceptor acceptor;
 	std::vector<Player> playersSet;
 	bool isRunning;
+	std::thread mainLoopThread;
 };

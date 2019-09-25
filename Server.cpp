@@ -2,6 +2,7 @@
 #include <boost/bind.hpp>
 #include <utility>
 #include "Config.h"
+#include <iostream>
 
 Server::Server(boost::asio::io_context& ioContext) : 
 	ioContext(ioContext),
@@ -9,12 +10,18 @@ Server::Server(boost::asio::io_context& ioContext) :
 	isRunning(false)
 {
 	startAccepting();
-	//TODO: Fix - blocks connection handling
-	//mainLoop();
+
+	mainLoopThread = std::thread(&Server::mainLoop, this);
+}
+
+Server::~Server()
+{
+	mainLoopThread.join();
 }
 
 void Server::mainLoop()
 {
+	std::cout << "Starting loop" << std::endl;
 	isRunning = true;
 	while (isRunning) {
 		std::for_each(playersSet.begin(), playersSet.end(), [](Player player)
@@ -28,6 +35,7 @@ void Server::mainLoop()
 
 void Server::startAccepting()
 {
+	std::cout << "Check" << std::endl;
 	Connection::handler newConnection = Connection::createConnection(ioContext);
 
 	acceptor.async_accept(newConnection->getSocket(),
